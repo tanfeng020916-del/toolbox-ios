@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101a2e">
+<title>轻松算高级版 激活码生成器</title>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    min-height:100vh;background:#101a2e;
+    color:#e6ecf7;font:15px/1.6 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+    padding:22px 18px 40px;
+  }
+  .card{
+    max-width:520px;margin:0 auto;background:#16203a;border:1px solid #c8a24a;border-radius:16px;
+    padding:26px 20px 24px;
+  }
+  h1{
+    margin:6px 0 24px;text-align:center;font-size:23px;letter-spacing:1px;color:#ffd54a;
+    text-shadow:0 0 18px rgba(255,213,74,.25);
+  }
+  label{display:block;font-size:14.5px;color:#cfd8e8;margin:0 0 9px}
+  input,select,button{font:inherit}
+  .field{margin-bottom:20px}
+  input[type=text],input[type=date]{
+    width:100%;height:52px;background:#0f172a;border:1px solid #2b3a5c;border-radius:10px;
+    color:#e6ecf7;padding:0 14px;font-size:15px;outline:none;
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+  }
+  input[type=date]{font-family:inherit;color-scheme:dark}
+  input:focus{border-color:#ffc61a}
+  input::placeholder{color:#5d6b85}
+  input:disabled{opacity:.45}
+  .row{display:flex;gap:10px;align-items:center}
+  .row input[type=date]{flex:1}
+  .chip{
+    height:52px;padding:0 18px;border-radius:10px;border:1px solid #2b3a5c;background:#0f172a;
+    color:#9fb0cd;font-size:14.5px;white-space:nowrap;cursor:pointer;
+  }
+  .chip.on{background:#ffc61a;border-color:#ffc61a;color:#1b1400;font-weight:700}
+  .btn{
+    width:100%;height:56px;margin-top:6px;border:0;border-radius:12px;cursor:pointer;
+    background:linear-gradient(180deg,#ffd24a,#ffc000);color:#20180a;font-size:17px;font-weight:800;
+    letter-spacing:1px;box-shadow:0 6px 18px rgba(255,198,26,.22);
+  }
+  .btn:active{transform:translateY(1px)}
+  .out{
+    margin-top:20px;display:none;background:#0d1526;border:1px dashed #2b3a5c;border-radius:12px;padding:14px;
+  }
+  .out.on{display:block}
+  .out .meta{font-size:12.5px;color:#8fa2c0;margin-bottom:10px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .out code{display:block;word-break:break-all;font:12.5px/1.6 ui-monospace,Consolas,monospace;color:#9ef0c9}
+  .out .acts{display:flex;gap:10px;margin-top:12px}
+  .out .acts button{flex:1;height:42px;border-radius:9px;border:1px solid #2b3a5c;background:#141d33;color:#cfe0ff;font-size:14px;cursor:pointer}
+  .out .acts button.pri{background:#1f3b2c;border-color:#2b6b4b;color:#9ef0c9}
+  .err{display:none;margin-top:14px;color:#ff8b8b;font-size:13.5px;text-align:center;line-height:1.7}
+  .err.on{display:block}
+  .hint{margin:18px auto 0;max-width:520px;color:#5d6b85;font-size:12px;text-align:center;line-height:1.8}
+  .toast{
+    position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);opacity:0;
+    background:#1d2a44;border:1px solid #ffc61a;color:#ffe9a8;padding:9px 18px;border-radius:10px;
+    font-size:13px;transition:.22s;pointer-events:none
+  }
+  .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>轻松算高级版 激活码生成器</h1>
+
+    <div class="field">
+      <label for="dev">设备码</label>
+      <input id="dev" type="text" inputmode="text" autocomplete="off" spellcheck="false"
+             placeholder="QS-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX">
+    </div>
+
+    <div class="field">
+      <label for="exp">到期时间</label>
+      <div class="row">
+        <input id="exp" type="date">
+        <button class="chip" id="perm" type="button">永久</button>
+      </div>
+    </div>
+
+    <button class="btn" id="gen">生成激活码</button>
+
+    <div class="err" id="err"></div>
+
+    <div class="out" id="out">
+      <div class="meta"><span id="om1"></span><span id="om2"></span></div>
+      <code id="ocode"></code>
+      <div class="acts">
+        <button class="pri" id="copy">复制激活码</button>
+        <button id="again">换一个</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="hint">
+    设备码在 App 首屏「轻松算高级版设备码」里复制：QS- 开头 + 32 位十六进制，共 35 位。<br>
+    选到哪天就授权到哪天结束（23:59）。日历最多选到 360 天后，更久请点「永久」。激活码离线生效，一码一机。
+  </div>
+
+  <div class="toast" id="toast">已复制</div>
+
+<script>var module = { exports: {} };</script>
+<script>
+// 纯 JS：SHA-256 + P-256 ECDSA（签名 / 验签）+ base64url
+// 无任何外部依赖，浏览器与 Node 通用。
+'use strict';
+
+/* ---------------- SHA-256 ---------------- */
+const K256 = [
+  0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+  0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+  0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+  0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+  0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+  0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+  0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+  0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+];
+
+function sha256(bytes) {
+  const H = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
+             0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19];
+  const len = bytes.length;
+  const bitLen = len * 8;
+  const padLen = ((len + 8) >> 6) * 64 + 64;
+  const m = new Uint8Array(padLen);
+  m.set(bytes);
+  m[len] = 0x80;
+  const dv = new DataView(m.buffer);
+  dv.setUint32(padLen - 4, bitLen >>> 0, false);
+  dv.setUint32(padLen - 8, Math.floor(bitLen / 4294967296), false);
+
+  const w = new Uint32Array(64);
+  for (let off = 0; off < padLen; off += 64) {
+    for (let i = 0; i < 16; i++) w[i] = dv.getUint32(off + i * 4, false);
+    for (let i = 16; i < 64; i++) {
+      const s0 = rotr(w[i - 15], 7) ^ rotr(w[i - 15], 18) ^ (w[i - 15] >>> 3);
+      const s1 = rotr(w[i - 2], 17) ^ rotr(w[i - 2], 19) ^ (w[i - 2] >>> 10);
+      w[i] = (w[i - 16] + s0 + w[i - 7] + s1) >>> 0;
+    }
+    let a = H[0], b = H[1], c = H[2], d = H[3], e = H[4], f = H[5], g = H[6], h = H[7];
+    for (let i = 0; i < 64; i++) {
+      const S1 = rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25);
+      const ch = (e & f) ^ (~e & g);
+      const t1 = (h + S1 + ch + K256[i] + w[i]) >>> 0;
+      const S0 = rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22);
+      const maj = (a & b) ^ (a & c) ^ (b & c);
+      const t2 = (S0 + maj) >>> 0;
+      h = g; g = f; f = e; e = (d + t1) >>> 0;
+      d = c; c = b; b = a; a = (t1 + t2) >>> 0;
+    }
+    H[0] = (H[0] + a) >>> 0; H[1] = (H[1] + b) >>> 0;
+    H[2] = (H[2] + c) >>> 0; H[3] = (H[3] + d) >>> 0;
+    H[4] = (H[4] + e) >>> 0; H[5] = (H[5] + f) >>> 0;
+    H[6] = (H[6] + g) >>> 0; H[7] = (H[7] + h) >>> 0;
+  }
+  const out = new Uint8Array(32);
+  const ov = new DataView(out.buffer);
+  for (let i = 0; i < 8; i++) ov.setUint32(i * 4, H[i], false);
+  return out;
+}
+function rotr(x, n) { return ((x >>> n) | (x << (32 - n))) >>> 0; }
+
+/* ---------------- P-256 ---------------- */
+const P = 0xffffffff00000001000000000000000000000000ffffffffffffffffffffffffn;
+const N = 0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551n;
+const A = P - 3n;
+const B = 0x5ac635d8aa3a93e7b3ebbd55769886bc651d06b0cc53b0f63bce3c3e27d2604bn;
+const GX = 0x6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296n;
+const GY = 0x4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5n;
+
+const mod = (a, m) => { const r = a % m; return r < 0n ? r + m : r; };
+
+function invMod(a, m) {
+  let [old_r, r] = [mod(a, m), m];
+  let [old_s, s] = [1n, 0n];
+  while (r !== 0n) {
+    const q = old_r / r;
+    [old_r, r] = [r, old_r - q * r];
+    [old_s, s] = [s, old_s - q * s];
+  }
+  if (old_r !== 1n) throw new Error('not invertible');
+  return mod(old_s, m);
+}
+
+// 仿射点，null 表示无穷远
+function pointAdd(p1, p2) {
+  if (p1 === null) return p2;
+  if (p2 === null) return p1;
+  const [x1, y1] = p1, [x2, y2] = p2;
+  if (x1 === x2) {
+    if (mod(y1 + y2, P) === 0n) return null;
+    const l = mod(3n * x1 * x1 + A, P) * invMod(2n * y1, P) % P;
+    const x3 = mod(l * l - 2n * x1, P);
+    return [x3, mod(l * (x1 - x3) - y1, P)];
+  }
+  const l = mod(y2 - y1, P) * invMod(x2 - x1, P) % P;
+  const x3 = mod(l * l - x1 - x2, P);
+  return [x3, mod(l * (x1 - x3) - y1, P)];
+}
+
+function pointMul(k, pt) {
+  let r = null, addend = pt;
+  while (k > 0n) {
+    if (k & 1n) r = pointAdd(r, addend);
+    addend = pointAdd(addend, addend);
+    k >>= 1n;
+  }
+  return r;
+}
+
+const bytesToBig = (b) => BigInt('0x' + (b.length ? Array.from(b, (x) => x.toString(16).padStart(2, '0')).join('') : '0'));
+
+function bigToBytes(v, len) {
+  let hex = v.toString(16);
+  if (hex.length % 2) hex = '0' + hex;
+  const out = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < out.length; i++) out[i] = parseInt(hex.substr(i * 2, 2), 16);
+  if (len === undefined) return out;
+  if (out.length > len) throw new Error('integer too large');
+  const padded = new Uint8Array(len);
+  padded.set(out, len - out.length);
+  return padded;
+}
+
+function randomScalar() {
+  const buf = new Uint8Array(32);
+  if (typeof globalThis.crypto !== 'undefined' && globalThis.crypto.getRandomValues) {
+    globalThis.crypto.getRandomValues(buf);
+  } else {
+    const njc = require('crypto');
+    buf.set(njc.randomBytes(32));
+  }
+  const v = mod(bytesToBig(buf), N);
+  return v === 0n ? 1n : v;
+}
+
+function derEncodeInt(v) {
+  let b = bigToBytes(v);
+  while (b.length > 1 && b[0] === 0) b = b.slice(1);
+  if (b[0] & 0x80) {
+    const out = new Uint8Array(b.length + 1);
+    out.set(b, 1);
+    return out;
+  }
+  return b;
+}
+
+function derEncodeSig(r, s) {
+  const rb = derEncodeInt(r), sb = derEncodeInt(s);
+  const body = new Uint8Array(2 + rb.length + 2 + sb.length);
+  let i = 0;
+  body[i++] = 0x02; body[i++] = rb.length; body.set(rb, i); i += rb.length;
+  body[i++] = 0x02; body[i++] = sb.length; body.set(sb, i); i += sb.length;
+  const out = new Uint8Array(2 + body.length);
+  out[0] = 0x30; out[1] = body.length; out.set(body, 2);
+  return out;
+}
+
+function derDecodeSig(sig) {
+  if (sig[0] !== 0x30 || sig[1] !== sig.length - 2) throw new Error('bad DER');
+  let i = 2;
+  if (sig[i] !== 0x02) throw new Error('bad INTEGER');
+  const rl = sig[i + 1];
+  const r = bytesToBig(sig.slice(i + 2, i + 2 + rl));
+  i += 2 + rl;
+  if (sig[i] !== 0x02) throw new Error('bad INTEGER');
+  const sl = sig[i + 1];
+  const s = bytesToBig(sig.slice(i + 2, i + 2 + sl));
+  i += 2 + sl;
+  if (i !== sig.length) throw new Error('trailing bytes');
+  return { r, s };
+}
+
+// 签名：消息原文 + 私钥标量 d -> DER 签名
+function ecdsaSign(messageBytes, d) {
+  const z = bytesToBig(sha256(messageBytes));
+  for (;;) {
+    const k = randomScalar();
+    const R = pointMul(k, [GX, GY]);
+    if (R === null) continue;
+    const r = mod(R[0], N);
+    if (r === 0n) continue;
+    const s = mod(invMod(k, N) * mod(z + r * d, N), N);
+    if (s === 0n) continue;
+    return derEncodeSig(r, s);
+  }
+}
+
+function ecdsaVerify(messageBytes, sig, qx, qy) {
+  const { r, s } = derDecodeSig(sig);
+  if (r <= 0n || r >= N || s <= 0n || s >= N) return false;
+  const z = bytesToBig(sha256(messageBytes));
+  const w = invMod(s, N);
+  const u1 = mod(z * w, N), u2 = mod(r * w, N);
+  const pt = pointAdd(pointMul(u1, [GX, GY]), pointMul(u2, [qx, qy]));
+  if (pt === null) return false;
+  return mod(pt[0], N) === r;
+}
+
+/* ---------------- base64url ---------------- */
+const B64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+
+function b64urlEncode(bytes) {
+  let out = '';
+  let i = 0;
+  for (; i + 2 < bytes.length; i += 3) {
+    const n = (bytes[i] << 16) | (bytes[i + 1] << 8) | bytes[i + 2];
+    out += B64[(n >>> 18) & 63] + B64[(n >>> 12) & 63] + B64[(n >>> 6) & 63] + B64[n & 63];
+  }
+  const rest = bytes.length - i;
+  if (rest === 1) {
+    const n = bytes[i] << 16;
+    out += B64[(n >>> 18) & 63] + B64[(n >>> 12) & 63];
+  } else if (rest === 2) {
+    const n = (bytes[i] << 16) | (bytes[i + 1] << 8);
+    out += B64[(n >>> 18) & 63] + B64[(n >>> 12) & 63] + B64[(n >>> 6) & 63];
+  }
+  return out;
+}
+
+function b64urlDecode(str) {
+  if (!/^[A-Za-z0-9_-]*$/.test(str)) throw new Error('bad base64url');
+  if (str.length % 4 === 1) throw new Error('bad base64url length');
+  const out = [];
+  let bits = 0, acc = 0;
+  for (const ch of str) {
+    const v = B64.indexOf(ch);
+    if (v < 0) throw new Error('bad base64url char');
+    acc = ((acc << 6) | v) & 0xffffff;
+    bits += 6;
+    if (bits >= 8) {
+      bits -= 8;
+      out.push((acc >> bits) & 0xff);
+    }
+  }
+  if (bits > 0 && (acc & ((1 << bits) - 1)) !== 0) throw new Error('non-canonical tail bits');
+  return new Uint8Array(out);
+}
+
+const utf8Encode = (s) => {
+  if (typeof TextEncoder !== 'undefined') return new TextEncoder().encode(s);
+  return new Uint8Array(Buffer.from(s, 'utf8'));
+};
+
+module.exports = {
+  sha256, ecdsaSign, ecdsaVerify, b64urlEncode, b64urlDecode,
+  utf8Encode, pointMul, GX, GY, N, bigToBytes, bytesToBig
+};
+
+</script>
+<script>
+var KP = {
+  "keyId": "760804931b5e4872",
+  "d": "6dac34602b9e3659da023dd2b85791214b2d6ae0fa5744687b28c1cd787ac667",
+  "qx": "59fffaf9609d41c669266e393f15498155155d849693b2fe9584b7308e8717ef",
+  "qy": "fbc74fadbfd4c9f0d52ad364a1648871be7f71cee0906f15481fa864589ea5ec",
+  "publicKeyDerBase64": "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEWf/6+WCdQcZpJm45PxVJgVUVXYSWk7L+lYS3MI6HF+/7x0+tv9TJ8NUq02ShZIhxvn9xzuCQbxVIH6hkWJ6l7A=="
+};
+var EC = module.exports;
+var LICENSE_APP_ID = 'cn.qingji.stats';
+var PERM_EXP = 253402300799n;
+var DAY_PLANS = ['3d', '7d', '15d', '30d'];
+var MONTH_PLANS = ['1m', '6m', '1y'];
+var PLAN_LABEL = { '3d': '3 天', '7d': '7 天', '15d': '15 天', '30d': '30 天', '1m': '1 个月', '6m': '6 个月', '1y': '1 年', permanent: '永久' };
+// 每种「月」档在回推签发日期时搜索的天数窗口
+var MONTH_WINDOW = { '1m': [26, 45], '6m': [170, 205], '1y': [350, 400] };
+
+var $ = function (id) { return document.getElementById(id); };
+var permanent = false;
+
+/* ---------- 与 App 完全一致的到期算法 ---------- */
+function addMonthsUtc(sec, months) {
+  var d = new Date(sec * 1000);
+  var y = d.getUTCFullYear(), m = d.getUTCMonth(), day = d.getUTCDate();
+  var total = y * 12 + m + months, ny = Math.floor(total / 12), nm = ((total % 12) + 12) % 12;
+  var last = new Date(Date.UTC(ny, nm + 1, 0)).getUTCDate();
+  return Math.floor(Date.UTC(ny, nm, Math.min(day, last),
+    d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds(), d.getUTCMilliseconds()) / 1000);
+}
+function expiryOf(issuedSec, plan) {
+  if (plan === 'permanent') return PERM_EXP;
+  if (plan === '3d' || plan === '7d' || plan === '15d' || plan === '30d') {
+    return BigInt(issuedSec) + BigInt(parseInt(plan, 10)) * 86400n;
+  }
+  var months = plan === '1m' ? 1 : (plan === '6m' ? 6 : 12);
+  return BigInt(addMonthsUtc(issuedSec, months));
+}
+
+/* ---------- 由「到期日」反推签发时间 + 时长档 ----------
+   App 要求：到期秒 == f(签发秒, 时长)，且 签发秒 <= 当前时间 + 300。
+   所以给定目标到期秒 D，找出能精确命中 D 且签发时间不晚于现在的档位。 */
+function solveForDate(targetSec) {
+  var now = Math.floor(Date.now() / 1000);
+  var limit = now + 300;
+
+  // 天档：签发 = D - N 天，精确
+  for (var i = 0; i < DAY_PLANS.length; i++) {
+    var plan = DAY_PLANS[i];
+    var issued = targetSec - parseInt(plan, 10) * 86400;
+    if (issued > 0 && issued <= limit && expiryOf(issued, plan) === BigInt(targetSec)) {
+      return { plan: plan, issued: issued };
+    }
+  }
+  // 月档：回推窗口内逐天试
+  for (var j = 0; j < MONTH_PLANS.length; j++) {
+    var mp = MONTH_PLANS[j];
+    var win = MONTH_WINDOW[mp];
+    for (var k = win[0]; k <= win[1]; k++) {
+      var cand = targetSec - k * 86400;
+      if (cand <= 0 || cand > limit) continue;
+      if (expiryOf(cand, mp) === BigInt(targetSec)) return { plan: mp, issued: cand };
+    }
+  }
+  return null;
+}
+
+function pad2(n) { return String(n).padStart(2, '0'); }
+function fmt(sec) {
+  var d = new Date(Number(sec) * 1000);
+  return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+}
+function toDateInput(d) {
+  return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+}
+function toast(msg) {
+  var t = $('toast'); t.textContent = msg; t.classList.add('on');
+  clearTimeout(t._h); t._h = setTimeout(function () { t.classList.remove('on'); }, 1600);
+}
+function showErr(msg) {
+  var e = $('err');
+  if (!msg) { e.classList.remove('on'); e.textContent = ''; return; }
+  e.innerHTML = msg; e.classList.add('on');
+}
+function normalizeDevice(raw) {
+  var s = (raw || '').trim().toUpperCase().replace(/\s+/g, '');
+  if (/^[0-9A-F]{32}$/.test(s)) s = 'QS-' + s;
+  return s;
+}
+function randomSerial() {
+  var b = new Uint8Array(16); crypto.getRandomValues(b);
+  return Array.from(b, function (x) { return x.toString(16).padStart(2, '0'); }).join('');
+}
+function mint(deviceCode, expSec, plan, iatSec) {
+  var payload = 'QSL1|' + LICENSE_APP_ID + '|' + KP.keyId + '|' + randomSerial() + '|' + deviceCode +
+    '|' + iatSec + '|' + expSec + '|' + plan;
+  var pb = EC.utf8Encode(payload);
+  var sig = EC.ecdsaSign(pb, BigInt('0x' + KP.d));
+  var ok = EC.ecdsaVerify(pb, sig, BigInt('0x' + KP.qx), BigInt('0x' + KP.qy));
+  return { code: 'QSL1.' + EC.b64urlEncode(pb) + '.' + EC.b64urlEncode(sig), ok: ok };
+}
+
+/* ---------- 日期控件初始值 ---------- */
+(function initDate() {
+  var today = new Date();
+  var def = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 30);
+  var max = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 360);
+  $('exp').value = toDateInput(def);
+  $('exp').min = toDateInput(today);
+  $('exp').max = toDateInput(max);
+})();
+
+$('perm').onclick = function () {
+  permanent = !permanent;
+  this.classList.toggle('on', permanent);
+  $('exp').disabled = permanent;
+};
+
+$('gen').onclick = function () {
+  showErr('');
+  $('out').classList.remove('on');
+
+  var dc = normalizeDevice($('dev').value);
+  if (/^[0-9A-F]{16}$/.test(dc)) {
+    showErr('这是老版本那套 16 位设备 ID，轻松算高级版不通用。<br>请复制 App 里 QS- 开头那串（共 35 位）');
+    $('dev').focus();
+    return;
+  }
+  if (!/^QS-[0-9A-F]{32}$/.test(dc)) {
+    showErr('设备码不对：应该是 QS- 开头 35 位（QS- + 32 位十六进制）');
+    $('dev').focus();
+    return;
+  }
+
+  var iat, exp, plan;
+  if (permanent) {
+    plan = 'permanent';
+    iat = Math.floor(Date.now() / 1000);
+    exp = PERM_EXP;
+  } else {
+    var v = $('exp').value;
+    if (!v) { showErr('先选一个到期日期，或点「永久」'); return; }
+    var parts = v.split('-');
+    // 到期日当天 23:59:59（本地时区）
+    var target = Math.floor(new Date(+parts[0], +parts[1] - 1, +parts[2], 23, 59, 59).getTime() / 1000);
+    var now = Math.floor(Date.now() / 1000);
+    if (target <= now) { showErr('到期日期必须在今天以后'); return; }
+    var solved = solveForDate(target);
+    if (!solved) {
+      showErr('这个日期 App 那边对不上（它要求「到期 = 签发 + 固定时长」，且最长 1 年）。<br>换一天，或直接点「永久」');
+      return;
+    }
+    plan = solved.plan; iat = solved.issued; exp = BigInt(target);
+  }
+
+  var r = mint(dc, exp.toString(), plan, iat);
+  if (!r.ok) { showErr('签名自检失败，请重试'); return; }
+
+  $('ocode').textContent = r.code;
+  $('om1').textContent = dc;
+  $('om2').textContent = '到期：' + (plan === 'permanent' ? '永久' : fmt(exp.toString())) +
+    (plan === 'permanent' ? '（永久）' : '（按' + PLAN_LABEL[plan] + '签发）');
+  $('out').classList.add('on');
+  $('out').scrollIntoView({ behavior: 'smooth', block: 'center' });
+};
+
+$('copy').onclick = function () {
+  var code = $('ocode').textContent;
+  if (!code) return;
+  var done = function () { toast('激活码已复制'); };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(code).then(done, function () { fb(code); done(); });
+  } else { fb(code); done(); }
+  function fb(t) {
+    var ta = document.createElement('textarea');
+    ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+};
+
+$('again').onclick = function () {
+  $('out').classList.remove('on');
+  $('dev').value = '';
+  $('dev').focus();
+};
+</script>
+</body>
+</html>
