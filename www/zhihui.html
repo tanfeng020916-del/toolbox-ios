@@ -65,6 +65,15 @@
   }
   .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
+<style id="qj-dsel-css">
+.qjdsel{display:flex;gap:8px;flex:1 1 auto;min-width:0}
+.qjdsel select{
+  flex:1 1 0;min-width:0;height:52px;background:#0f172a;border:1px solid #2b3a5c;border-radius:10px;
+  color:#e6ecf7;font:15px/1.2 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+  padding:0 6px;text-align:center;text-align-last:center;-webkit-appearance:none;appearance:none;
+}
+.qjdsel select:focus{border-color:#ffc61a;outline:none}
+</style>
 </head>
 <body>
   <div class="card">
@@ -79,7 +88,9 @@
     <div class="field">
       <label for="exp">到期时间</label>
       <div class="row">
-        <input id="exp" type="date">
+        <div class="qjdsel" id="qjdsel">
+        <select id="expY" aria-label="年"></select><select id="expM" aria-label="月"></select><select id="expD" aria-label="日"></select>
+      </div><input id="exp" type="hidden" value="">
         <button class="chip" id="perm" type="button">永久</button>
       </div>
     </div>
@@ -489,6 +500,48 @@ $('again').onclick = function () {
   $('dev').value = '';
   $('dev').focus();
 };
+</script>
+<script id="qj-dsel-js">
+(function(){
+  var exp=document.getElementById('exp');
+  var Y=document.getElementById('expY'),M=document.getElementById('expM'),D=document.getElementById('expD');
+  if(!exp||!Y||!M||!D) return;
+  var nowY=new Date().getFullYear();
+  for(var y=nowY;y<=nowY+8;y++) Y.add(new Option(y+' 年',y));
+  for(var m=1;m<=12;m++) M.add(new Option(m+' 月',m));
+  function dim(y,m){ return new Date(y,m,0).getDate(); }
+  function fillD(keep){
+    if(!Y.value||!M.value){ D.innerHTML=''; return; }
+    var y=+Y.value, m=+M.value, n=dim(y,m), want=+keep||+D.value||1;
+    D.innerHTML='';
+    for(var d=1;d<=n;d++) D.add(new Option(d+' 日',d));
+    D.value=Math.min(want,n);
+  }
+  function toVal(){
+    if(!Y.value||!M.value||!D.value) return '';
+    var y=+Y.value,m=+M.value,d=+D.value;
+    return y+'-'+(m<10?'0':'')+m+'-'+(d<10?'0':'')+d;
+  }
+  var real=exp.value||'';
+  function fromVal(v){
+    if(!v){ Y.value=''; M.value=''; D.innerHTML=''; return; }
+    var p=String(v).split('-');
+    if(p.length<3) return;
+    Y.value=+p[0]; M.value=+p[1]; fillD(+p[2]); D.value=+p[2];
+  }
+  fromVal(real);
+  if(!real){ Y.value=nowY+1; M.value=new Date().getMonth()+1; fillD(1); real=toVal(); }
+  try{
+    Object.defineProperty(exp,'value',{
+      configurable:true,
+      get:function(){ return real; },
+      set:function(v){ real=v||''; fromVal(real); }
+    });
+  }catch(e){}
+  Y.addEventListener('change',function(){ fillD(1); real=toVal(); });
+  M.addEventListener('change',function(){ fillD(1); real=toVal(); });
+  D.addEventListener('change',function(){ real=toVal(); });
+})();
 </script>
 </body>
 </html>
