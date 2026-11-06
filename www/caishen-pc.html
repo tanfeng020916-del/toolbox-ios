@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101a2e">
+<title>财神智能统计加强版 · 电脑版 注册机</title>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    min-height:100vh;background:#101a2e;
+    color:#e6ecf7;font:15px/1.6 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+    padding:22px 18px 40px;
+  }
+  .card{
+    max-width:520px;margin:0 auto;background:#16203a;border:1px solid #c8a24a;border-radius:16px;
+    padding:26px 20px 24px;
+  }
+  h1{margin:6px 0 4px;text-align:center;font-size:22px;letter-spacing:.5px;color:#ffd54a;
+     text-shadow:0 0 18px rgba(255,213,74,.25)}
+  .sub{text-align:center;color:#7f8ca6;font-size:12.5px;margin-bottom:22px}
+  label{display:block;font-size:14.5px;color:#cfd8e8;margin:0 0 9px}
+  input,select,button{font:inherit}
+  .field{margin-bottom:20px}
+  input[type=text]{
+    width:100%;height:52px;background:#0f172a;border:1px solid #2b3a5c;border-radius:10px;
+    color:#e6ecf7;padding:0 14px;font-size:15px;outline:none;letter-spacing:1px;
+    font-family:ui-monospace,SFMono-Regular,Consolas,monospace;text-transform:uppercase;
+  }
+  input:focus{border-color:#ffc61a}
+  input::placeholder{color:#5d6b85;letter-spacing:0;text-transform:none}
+  .durrow{display:flex;gap:10px;align-items:center;flex-wrap:nowrap}
+  .durrow input[type=number]{
+    flex:1 1 0;min-width:0;height:52px;background:#0f172a;border:1px solid #2b3a5c;border-radius:10px;
+    color:#e6ecf7;padding:0 14px;font:16px/1.2 ui-monospace,Menlo,Consolas,monospace;outline:none;
+    -moz-appearance:textfield;
+  }
+  .durrow input[type=number]::-webkit-outer-spin-button,
+  .durrow input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .durrow select{
+    flex:0 0 84px;height:52px;padding:0 10px;border-radius:10px;border:1px solid #2b3a5c;background:#0f172a;
+    color:#e6ecf7;font:15px/1.2 -apple-system,"PingFang SC",sans-serif;text-align:center;
+    -webkit-appearance:none;appearance:none;
+  }
+  .chip{
+    flex:0 0 auto;height:52px;padding:0 18px;border-radius:10px;border:1px solid #2b3a5c;background:#0f172a;
+    color:#9fb0cd;font-size:14.5px;white-space:nowrap;cursor:pointer;
+  }
+  .chip.on{background:#ffc61a;border-color:#ffc61a;color:#1b1400;font-weight:700}
+  .durq{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+  .durq button{
+    height:36px;border-radius:8px;border:1px solid #2b3a5c;background:#101a2e;color:#9fb0cd;
+    font-size:13px;cursor:pointer;width:100%;
+  }
+  .durq button.on{background:#ffc61a;border-color:#ffc61a;color:#1b1400;font-weight:700}
+  .dueinfo{margin-top:10px;color:#7f8ca6;font-size:12.5px;line-height:1.6}
+  .dueinfo b{color:#ffd54a;font-weight:600}
+  .btn{
+    width:100%;height:56px;margin-top:6px;border:0;border-radius:12px;cursor:pointer;
+    background:linear-gradient(180deg,#ffd24a,#ffc000);color:#20180a;font-size:17px;font-weight:800;
+    box-shadow:0 6px 18px rgba(255,196,0,.22);
+  }
+  .btn:active{transform:translateY(1px)}
+  .result{
+    display:none;margin-top:18px;padding:14px;border-radius:12px;background:#0f172a;border:1px solid #2b3a5c;
+    font:12.5px/1.7 ui-monospace,SFMono-Regular,Consolas,monospace;color:#c9f5c0;
+    word-break:break-all;white-space:pre-wrap;
+  }
+  .result .hint{color:#7f8ca6;font-size:12px}
+  .note{margin:18px auto 0;max-width:520px;color:#5d6b85;font-size:12px;text-align:center;line-height:1.8}
+  .note b{color:#8fa2c4}
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>财神智能统计加强版</h1>
+    <div class="sub">电脑版 · 注册码生成</div>
+
+    <div class="field">
+      <label for="mc">机器码</label>
+      <input type="text" id="mc" maxlength="24" autocomplete="off" spellcheck="false"
+             placeholder="XXXX-XXXX-XXXX-XXXX-XXXX">
+    </div>
+
+    <div class="field">
+      <label>授权时长</label>
+      <div class="durrow">
+        <input id="durN" type="number" inputmode="numeric" min="1" step="1" value="365">
+        <select id="durU" aria-label="单位">
+          <option value="1">天</option>
+          <option value="30">个月</option>
+          <option value="365">年</option>
+        </select>
+        <button class="chip" id="perm" type="button">永久</button>
+      </div>
+      <div class="durq" id="durq">
+        <button type="button" data-d="7">7 天</button>
+        <button type="button" data-d="30">30 天</button>
+        <button type="button" data-d="90">90 天</button>
+        <button type="button" data-d="180">180 天</button>
+        <button type="button" data-d="365">1 年</button>
+        <button type="button" data-d="1095">3 年</button>
+      </div>
+      <div class="dueinfo" id="dueinfo"></div>
+    </div>
+
+    <button class="btn" id="gen" type="button">生成注册码</button>
+    <div class="result" id="result"></div>
+  </div>
+
+  <p class="note">
+    机器码在 App「授权」页复制，格式 <b>XXXX-XXXX-XXXX-XXXX-XXXX</b><br>
+    注册码可<b>累计</b>：再输入一张会叠加到现有到期时间上；注册码离线生效，与机器绑定。
+  </p>
+
+<script>
+(function () {
+  // 与 App 内 electron/utils/LicenseManager.js 完全一致
+  var SECRET_KEY = 'XqqqJZlcDHbPeauguNxmMIAIuLJQ0Kev';
+  var DAY = 86400000;
+
+  var N = document.getElementById('durN'), U = document.getElementById('durU');
+  var permBtn = document.getElementById('perm'), info = document.getElementById('dueinfo');
+  var chips = document.getElementById('durq'), result = document.getElementById('result');
+  var mcInput = document.getElementById('mc');
+  var perm = false;
+
+  function days() {
+    var n = parseFloat(N.value || '0');
+    if (!isFinite(n) || n <= 0) return 0;
+    return Math.round(n * parseFloat(U.value));
+  }
+  function pad(n) { return ('0' + n).slice(-2); }
+  function fmtDate(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function expireDate() {
+    if (perm) return new Date(9999, 11, 31, 23, 59, 59);
+    var d = new Date();
+    d.setDate(d.getDate() + days());
+    d.setHours(23, 59, 59, 0);
+    return d;
+  }
+  function apply() {
+    if (perm) { info.innerHTML = '已选：<b>永久</b>（9999-12-31 到期）'; return; }
+    var dd = days();
+    if (!dd) { info.textContent = '请输入大于 0 的时长'; return; }
+    info.innerHTML = '到期：<b>' + fmtDate(expireDate()) + ' 23:59:59</b>（叠加 ' + dd + ' 天）';
+  }
+
+  N.addEventListener('input', function () {
+    perm = false; permBtn.classList.remove('on'); N.disabled = false; U.disabled = false; apply();
+  });
+  U.addEventListener('change', apply);
+  permBtn.onclick = function () {
+    perm = !perm; this.classList.toggle('on', perm);
+    N.disabled = perm; U.disabled = perm; apply();
+  };
+  Array.prototype.forEach.call(chips.querySelectorAll('button'), function (b) {
+    b.onclick = function () {
+      perm = false; permBtn.classList.remove('on'); N.disabled = false; U.disabled = false;
+      var dd = parseInt(b.getAttribute('data-d'), 10);
+      if (dd % 365 === 0) { N.value = dd / 365; U.value = '365'; }
+      else if (dd % 30 === 0) { N.value = dd / 30; U.value = '30'; }
+      else { N.value = dd; U.value = '1'; }
+      Array.prototype.forEach.call(chips.querySelectorAll('button'), function (x) { x.classList.remove('on'); });
+      b.classList.add('on');
+      apply();
+    };
+  });
+  apply();
+
+  function b64(bytes) {
+    var s = '';
+    for (var i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+    return btoa(s);
+  }
+
+  document.getElementById('gen').onclick = async function () {
+    var mc = (mcInput.value || '').trim().toUpperCase().replace(/\s+/g, '');
+    result.style.display = 'block';
+    if (!/^[A-Z2-7]{4}(-[A-Z2-7]{4}){4}$/.test(mc)) {
+      result.innerHTML = '<span class="hint">机器码格式不对：应该是 5 组、每组 4 位（大写字母和 2-7 的数字），中间用 - 连接</span>';
+      return;
+    }
+    if (!perm && !days()) {
+      result.innerHTML = '<span class="hint">请先填一个大于 0 的时长，或点「永久」</span>';
+      return;
+    }
+    if (!window.crypto || !crypto.subtle) {
+      result.innerHTML = '<span class="hint">当前是 http 打开的网页，浏览器不给用加密接口。<br>请用「授权工具箱」App，或 https 打开本页。</span>';
+      return;
+    }
+    try {
+      var now = Date.now();
+      var exp = expireDate().getTime();
+      var payload = JSON.stringify({ machineId: mc, expireTime: exp, createTime: now });
+      var key = await crypto.subtle.importKey('raw', new TextEncoder().encode(SECRET_KEY),
+        { name: 'AES-GCM' }, false, ['encrypt']);
+      var iv = crypto.getRandomValues(new Uint8Array(12));
+      var enc = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv, tagLength: 128 },
+        key, new TextEncoder().encode(payload)));
+      var ctLen = enc.length - 16;
+      var out = new Uint8Array(12 + 16 + ctLen);
+      out.set(iv, 0);
+      out.set(enc.subarray(ctLen), 12);        // tag
+      out.set(enc.subarray(0, ctLen), 28);     // 密文
+      var code = b64(out);
+      result.textContent = code;
+      result.onclick = function () {
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(code);
+        result.textContent = code + '\n\n（已复制）';
+      };
+    } catch (e) {
+      result.innerHTML = '<span class="hint">生成失败：' + e.message + '</span>';
+    }
+  };
+})();
+</script>
+</body>
+</html>
