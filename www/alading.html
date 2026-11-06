@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>阿拉丁激活码生成器</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: radial-gradient(1200px 600px at 50% -10%, #1c2a4a 0%, #0e1830 45%, #0a1224 100%);
+    min-height: 100vh;
+    color: #fff;
+    -webkit-font-smoothing: antialiased;
+    padding: 40px 16px 60px;
+  }
+  .card {
+    max-width: 420px;
+    margin: 0 auto 22px;
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,214,10,.35);
+    border-radius: 24px;
+    padding: 30px 24px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.45);
+    backdrop-filter: blur(10px);
+  }
+  h1 {
+    text-align: center;
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    background: linear-gradient(90deg, #ffd60a, #ffb300);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 24px;
+  }
+  h2 { font-size: 17px; font-weight: 700; margin-bottom: 16px; color: #ffd60a; }
+  label { display: block; font-size: 14px; color: #c9d2e3; margin: 16px 0 8px; }
+  input[type=text] {
+    width: 100%;
+    padding: 13px 15px;
+    font-size: 15px;
+    color: #fff;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.14);
+    border-radius: 12px;
+    outline: none;
+    transition: border .2s;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+  }
+  input[type=text]::placeholder { color: #6b7690; }
+  input[type=text]:focus { border-color: #ffd60a; }
+  input.err { border-color: #ff453a; animation: shake .3s; }
+  @keyframes shake { 0%,100%{transform:none} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    padding: 9px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,.15);
+    background: rgba(255,255,255,.06);
+    color: #c9d2e3;
+    font-size: 13.5px;
+    cursor: pointer;
+    transition: all .15s;
+    user-select: none;
+  }
+  .chip:hover { border-color: rgba(255,214,10,.5); }
+  .chip.sel { background: linear-gradient(180deg,#ffd60a,#ffb300); color: #1a1a1a; font-weight: 700; border-color: transparent; }
+
+  .btn-main {
+    width: 100%;
+    margin-top: 22px;
+    padding: 15px;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(180deg, #ffd60a, #ffb300);
+    color: #1a1a1a;
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(255,193,7,.35);
+    transition: transform .1s, filter .2s;
+  }
+  .btn-main:hover { filter: brightness(1.05); }
+  .btn-main:active { transform: scale(.98); }
+  .btn-sub {
+    width: 100%;
+    margin-top: 12px;
+    padding: 13px;
+    border: 1px solid rgba(255,255,255,.18);
+    border-radius: 14px;
+    background: rgba(255,255,255,.06);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-sub:active { transform: scale(.98); }
+
+  .msg { margin-top: 14px; font-size: 13px; color: #ff6961; display: none; text-align: center; line-height: 1.6; }
+  .msg.show { display: block; }
+  .msg.ok { color: #5dd97c; }
+
+  .result {
+    margin-top: 20px;
+    background: rgba(255,214,10,.08);
+    border: 1px dashed rgba(255,214,10,.5);
+    border-radius: 16px;
+    padding: 16px;
+    display: none;
+    animation: fadein .35s ease;
+  }
+  .result.show { display: block; }
+  @keyframes fadein { from { opacity:0; transform: translateY(8px);} to { opacity:1; transform:none;} }
+  .result .rk { font-size: 12px; color: #c9d2e3; margin-bottom: 6px; }
+  .result .code {
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: #ffd60a;
+    word-break: break-all;
+    text-align: center;
+    padding: 6px 0 12px;
+  }
+  .result .meta { font-size: 12.5px; color: #9aa5bd; line-height: 1.9; }
+  .copy-row { display: flex; gap: 10px; margin-top: 12px; }
+  .btn-copy {
+    flex: 1;
+    padding: 11px;
+    border: none;
+    border-radius: 10px;
+    background: rgba(255,214,10,.16);
+    color: #ffd60a;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-copy:active { opacity: .7; }
+
+  .history { max-width: 420px; margin: 0 auto; }
+  .history h3 { font-size: 14px; color: #c9d2e3; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+  .history h3 button { border: none; background: none; color: #6b7690; font-size: 12px; cursor: pointer; }
+  .h-item {
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+  .h-item .info { min-width: 0; }
+  .h-item .code-s { font-family: "SF Mono", Menlo, monospace; font-size: 13.5px; color: #ffd60a; letter-spacing: .5px; }
+  .h-item .sub { font-size: 11.5px; color: #7a86a0; margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .h-item .copy-mini {
+    flex-shrink: 0; border: none; background: rgba(255,214,10,.14); color: #ffd60a;
+    font-size: 12px; padding: 6px 10px; border-radius: 8px; cursor: pointer;
+  }
+  .foot-tip { text-align: center; color: #5a6580; font-size: 12px; margin-top: 26px; line-height: 1.8; }
+</style>
+</head>
+<body>
+
+  <div class="card">
+    <h1>阿拉丁激活码生成器</h1>
+
+    <label>客户机器码（设备ID）</label>
+    <input type="text" id="machineInput" placeholder="粘贴客户发来的机器码" autocomplete="off" spellcheck="false">
+
+    <label>有效时长（激活后开始计时）</label>
+    <div class="chips" id="chips">
+      <div class="chip" data-h="24">1天(24h)</div>
+      <div class="chip" data-h="48">2天(48h)</div>
+      <div class="chip" data-h="72">3天(72h)</div>
+      <div class="chip" data-h="120">5天(120h)</div>
+      <div class="chip" data-h="576">24天(576h)</div>
+      <div class="chip sel" data-h="720">30天(720h)</div>
+      <div class="chip" data-h="1200">50天(1200h)</div>
+      <div class="chip" data-h="8760">365天(8760h)</div>
+    </div>
+    <label>或自定义小时数（1 ~ 1048575）</label>
+    <input type="text" id="hoursInput" placeholder="例如 240 = 10天" autocomplete="off" inputmode="numeric">
+
+    <button class="btn-main" id="genBtn" onclick="generate()">生成激活码</button>
+    <div class="msg" id="genMsg"></div>
+
+    <div class="result" id="genResult">
+      <div class="rk">激活码 Activation Code</div>
+      <div class="code" id="codeOut"></div>
+      <div class="meta" id="metaOut"></div>
+      <div class="copy-row">
+        <button class="btn-copy" onclick="copyOut()">复制激活码</button>
+        <button class="btn-copy" onclick="copyAll()">复制完整信息</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🔍 验证卡密（可选）</h2>
+    <label>卡密</label>
+    <input type="text" id="checkCard" placeholder="XXXXX-XXXXX-XXXXX-XXXXX" autocomplete="off" spellcheck="false">
+    <label>客户机器码</label>
+    <input type="text" id="checkHwid" placeholder="粘贴客户机器码" autocomplete="off" spellcheck="false">
+    <button class="btn-sub" onclick="doCheck()">验证</button>
+    <div class="msg" id="checkMsg"></div>
+  </div>
+
+  <div class="history">
+    <h3>生成记录 <button onclick="clearHistory()">清空</button></h3>
+    <div id="hList"></div>
+  </div>
+
+  <div class="foot-tip">
+    客户发机器码 → 粘贴 → 选时长 → 生成激活码发给客户<br>
+    算法与「阿拉丁发卡机.exe」完全一致（CARD3 · HMAC-SHA256），生成的卡密客户端可直接激活
+  </div>
+
+<script>
+/* ==================================================================
+   算法从 阿拉丁发卡机.exe (CARD3 / V3 版) 完整还原，已用真实卡密验证
+   卡密 = Base32( 20bit小时数 | 16bit序列号 | 8bit指纹 | 56bit签名 )
+   指纹 = HMAC-SHA256(SECRET, "HW|"    + 机器码)[0]
+   签名 = HMAC-SHA256(SECRET, "CARD3|" + 机器码 + "|" + 小时 + "|" + 序列号) 前7字节
+   ================================================================== */
+const SECRET = new Uint8Array([
+  0x41,0x6c,0x61,0x64,0x64,0x69,0x6e,0x2d,0x43,0x61,0x72,0x64,0x2d,0x76,0x33,0x2d,
+  0x4b,0x65,0x79,0x2d,0x32,0x30,0x32,0x36,0x9e,0x3b,0x71,0xc4,0x5a,0x08,0xd2,0x6f
+]);
+const ALPHA = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
+const MAX_HOURS = 1048575;
+
+async function hmac(msg) {
+  const key = await crypto.subtle.importKey("raw", SECRET, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(msg));
+  return new Uint8Array(sig);
+}
+
+function norm(s) { return (s || "").replace(/[^0-9A-Za-z]/g, "").toLowerCase(); }
+
+function putBits(bits, bitPos, len, value) {
+  const v = BigInt(value);
+  for (let i = 0; i < len; i++) {
+    const bit = Number((v >> BigInt(len - 1 - i)) & 1n);
+    const pos = bitPos + i;
+    if (bit) bits[pos >> 3] |= (1 << (7 - (pos & 7)));
+  }
+}
+function getBits(bits, bitPos, len) {
+  let v = 0n;
+  for (let i = 0; i < len; i++) {
+    const pos = bitPos + i;
+    const bit = (bits[pos >> 3] >> (7 - (pos & 7))) & 1;
+    v = (v << 1n) | BigInt(bit);
+  }
+  return v;
+}
+function b32Encode(bits, length) {
+  let out = "", pos = 0;
+  while (pos < length) {
+    let acc = 0;
+    for (let i = 0; i < 5; i++) {
+      const idx = pos + i;
+      const bit = idx < length ? (bits[idx >> 3] >> (7 - (idx & 7))) & 1 : 0;
+      acc = (acc << 1) | bit;
+    }
+    out += ALPHA[acc & 31];
+    pos += 5;
+  }
+  return out;
+}
+function b32Decode(s) {
+  const n = s.length * 5;
+  const arr = new Uint8Array((n + 7) >> 3);
+  let pos = 0;
+  for (const c of s) {
+    const idx = ALPHA.indexOf(c);
+    if (idx < 0) throw "卡密含非法字符（" + c + "）";
+    for (let b = 4; b >= 0; b--) {
+      if ((idx >> b) & 1) arr[pos >> 3] |= (1 << (7 - (pos & 7)));
+      pos++;
+    }
+  }
+  return arr;
+}
+function format(s) { return s.replace(/(.{5})/g, "$1-").replace(/-$/, ""); }
+
+/* 生成卡密（与 exe 的 Make 完全一致） */
+async function makeCard(hwid, hours, serial) {
+  const n = norm(hwid);
+  const bits = new Uint8Array(13);
+  putBits(bits, 0, 20, hours);
+  putBits(bits, 20, 16, serial);
+  const sig1 = await hmac("HW|" + n);
+  putBits(bits, 36, 8, sig1[0]);
+  const sig2 = await hmac("CARD3|" + n + "|" + hours + "|" + serial);
+  let v = 0n;
+  for (let i = 0; i < 7; i++) v = (v << 8n) | BigInt(sig2[i]);
+  putBits(bits, 44, 56, v);
+  return format(b32Encode(bits, 100));
+}
+
+/* 验证卡密（与 exe 的 VerifyV3 一致） */
+async function verifyCard(card, hwid) {
+  const s = card.replace(/-/g, "").toUpperCase();
+  if (s.length === 0) return { ok: false, err: "卡密为空" };
+  let bits;
+  try { bits = b32Decode(s); } catch (e) { return { ok: false, err: e }; }
+  const hours = Number(getBits(bits, 0, 20));
+  const serial = Number(getBits(bits, 20, 16));
+  const fp = Number(getBits(bits, 36, 8));
+  const sig = getBits(bits, 44, 56);
+  const n = norm(hwid);
+  const sig1 = await hmac("HW|" + n);
+  if (fp !== sig1[0]) return { ok: false, err: "此卡密不是本机的（机器码不符）", hours, serial };
+  const sig2 = await hmac("CARD3|" + n + "|" + hours + "|" + serial);
+  let v2 = 0n;
+  for (let i = 0; i < 7; i++) v2 = (v2 << 8n) | BigInt(sig2[i]);
+  if (sig !== v2) return { ok: false, err: "卡密无效（校验失败）", hours, serial };
+  if (hours <= 0) return { ok: false, err: "卡密时长无效（0 小时）", hours, serial };
+  return { ok: true, hours, serial };
+}
+
+/* ===================== UI ===================== */
+const machineInput = document.getElementById("machineInput");
+const hoursInput = document.getElementById("hoursInput");
+let selHours = 720;
+
+document.getElementById("chips").addEventListener("click", e => {
+  const chip = e.target.closest(".chip");
+  if (!chip) return;
+  document.querySelectorAll(".chip").forEach(c => c.classList.remove("sel"));
+  chip.classList.add("sel");
+  selHours = parseInt(chip.dataset.h);
+  hoursInput.value = "";
+  hideMsg("genMsg");
+});
+hoursInput.addEventListener("input", () => {
+  hoursInput.value = hoursInput.value.replace(/[^0-9]/g, "");
+  if (hoursInput.value) {
+    document.querySelectorAll(".chip").forEach(c => c.classList.remove("sel"));
+    selHours = null;
+  } else {
+    const def = document.querySelector('.chip[data-h="720"]');
+    if (def) def.classList.add("sel");
+    selHours = 720;
+  }
+  hideMsg("genMsg");
+});
+machineInput.addEventListener("input", () => { machineInput.value = machineInput.value.trim(); hideMsg("genMsg"); });
+machineInput.addEventListener("keydown", e => { if (e.key === "Enter") generate(); });
+hoursInput.addEventListener("keydown", e => { if (e.key === "Enter") generate(); });
+
+function showMsg(id, text, ok) {
+  const m = document.getElementById(id);
+  m.textContent = text;
+  m.classList.toggle("ok", !!ok);
+  m.classList.add("show");
+}
+function hideMsg(id) { document.getElementById(id).classList.remove("show", "ok"); }
+
+let lastResult = null;
+async function generate() {
+  const machine = machineInput.value.trim();
+  if (!machine) {
+    machineInput.classList.add("err");
+    setTimeout(() => machineInput.classList.remove("err"), 400);
+    return showMsg("genMsg", "请先粘贴客户的机器码");
+  }
+  let hours = selHours;
+  if (hoursInput.value) hours = parseInt(hoursInput.value);
+  if (!hours || hours <= 0) return showMsg("genMsg", "请选择或填写有效时长");
+  if (hours > MAX_HOURS) return showMsg("genMsg", "时长超过上限（" + MAX_HOURS + " 小时）");
+
+  const serial = crypto.getRandomValues(new Uint16Array(1))[0];
+  const code = await makeCard(machine, hours, serial);
+
+  lastResult = { code, machine, hours, serial, time: new Date().toLocaleString("zh-CN", { hour12: false }) };
+  document.getElementById("codeOut").textContent = code;
+  document.getElementById("metaOut").innerHTML =
+    "机器码：" + machine + "<br>时长：" + hours + " 小时（" + (hours / 24) + " 天） · 序列号：" + serial;
+  document.getElementById("genResult").classList.add("show");
+  showMsg("genMsg", "✅ 生成成功，可直接发给客户", true);
+  saveHistory(lastResult);
+}
+
+function copyText(t) { navigator.clipboard?.writeText(t).catch(() => {}); }
+function copyOut() { if (lastResult) copyText(lastResult.code); }
+function copyAll() {
+  if (!lastResult) return;
+  copyText("激活码：" + lastResult.code + "\n机器码：" + lastResult.machine + "\n时长：" + lastResult.hours + " 小时");
+}
+
+async function doCheck() {
+  const card = document.getElementById("checkCard").value.trim();
+  const hwid = document.getElementById("checkHwid").value.trim();
+  if (!card) return showMsg("checkMsg", "请输入卡密");
+  if (!hwid) return showMsg("checkMsg", "请输入客户机器码");
+  const r = await verifyCard(card, hwid);
+  if (r.ok) showMsg("checkMsg", "✅ 卡密有效：时长 " + r.hours + " 小时（" + (r.hours/24) + " 天）· 序列号 " + r.serial, true);
+  else showMsg("checkMsg", "❌ " + (r.err || "卡密无效") + (r.hours ? "（内含时长 " + r.hours + " 小时）" : ""));
+}
+
+document.getElementById("checkCard").addEventListener("input", e => {
+  e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, "");
+  hideMsg("checkMsg");
+});
+document.getElementById("checkHwid").addEventListener("input", () => hideMsg("checkMsg"));
+
+/* 历史记录 */
+function getHistory() { try { return JSON.parse(localStorage.getItem("aladdin_gen") || "[]"); } catch(e) { return []; } }
+function saveHistory(r) {
+  const h = getHistory();
+  h.unshift(r);
+  localStorage.setItem("aladdin_gen", JSON.stringify(h.slice(0, 50)));
+  renderHistory();
+}
+function renderHistory() {
+  const h = getHistory();
+  document.getElementById("hList").innerHTML = h.map(it => `
+    <div class="h-item">
+      <div class="info">
+        <div class="code-s">${it.code}</div>
+        <div class="sub">${it.machine} · ${it.hours}h · ${it.time}</div>
+      </div>
+      <button class="copy-mini" onclick="copyText('${it.code}')">复制</button>
+    </div>`).join("");
+}
+function clearHistory() { localStorage.removeItem("aladdin_gen"); renderHistory(); }
+renderHistory();
+</script>
+</body>
+</html>
