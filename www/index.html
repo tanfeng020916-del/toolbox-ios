@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0b0f1a">
+<title>授权工具箱</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;min-height:100%}
+  body{
+    background:radial-gradient(120% 70% at 50% 0%,#121a2e 0%,#0b0f1a 60%,#080b12 100%);
+    color:#e9eef8;font:15px/1.5 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+    padding:36px 18px 40px;display:flex;justify-content:center;
+  }
+  .wrap{width:100%;max-width:460px}
+  h1{margin:0;font-size:21px;font-weight:700;letter-spacing:.5px}
+  .sub{margin-top:7px;color:#59647f;font-size:12.5px}
+  .group{margin-top:24px}
+  .gtitle{font-size:11.5px;color:#59647f;letter-spacing:1.2px;margin:0 0 8px 6px}
+  .list{background:#111827;border:1px solid #1b2537;border-radius:16px;overflow:hidden}
+  .row{
+    display:flex;align-items:center;gap:11px;padding:15px 16px;
+    text-decoration:none;color:inherit;border-bottom:1px solid #17202f;
+  }
+  .row:last-child{border-bottom:0}
+  .row:active{background:#151f31}
+  .dot{width:7px;height:7px;border-radius:50%;flex:0 0 7px}
+  .name{font-size:14.5px;color:#e6ecf8}
+  .chev{
+    margin-left:auto;width:6px;height:6px;
+    border-right:1.5px solid #3a4a66;border-top:1.5px solid #3a4a66;
+    transform:rotate(45deg);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>授权工具箱</h1>
+  <div class="sub">离线签发 · 一机一码</div>
+
+  <div class="group">
+    <div class="gtitle">统计 · 算</div>
+    <div class="list">
+      <a class="row" href="qingji.html">
+        <span class="dot" style="background:#f0b429"></span>
+        <span class="name">轻松统计（安卓）</span>
+        <span class="chev"></span>
+      </a>
+      <a class="row" href="qingji-ios.html">
+        <span class="dot" style="background:#f0b429"></span>
+        <span class="name">轻松统计 iOS</span>
+        <span class="chev"></span>
+      </a>
+      <a class="row" href="qingsuan-pro.html">
+        <span class="dot" style="background:#a5b4fc"></span>
+        <span class="name">轻松算高级版</span>
+        <span class="chev"></span>
+      </a>
+      <a class="row" href="qingsuan.html">
+        <span class="dot" style="background:#a5b4fc"></span>
+        <span class="name">轻松算（简易版）</span>
+        <span class="chev"></span>
+      </a>
+    </div>
+  </div>
+  <div class="group">
+    <div class="gtitle">智慧订单</div>
+    <div class="list">
+      <a class="row" href="zhihui.html">
+        <span class="dot" style="background:#67e8f9"></span>
+        <span class="name">智慧移动端</span>
+        <span class="chev"></span>
+      </a>
+      <a class="row" href="wulei-zhihui-plus.html">
+        <span class="dot" style="background:#7dd3fc"></span>
+        <span class="name">智慧加强版</span>
+        <span class="chev"></span>
+      </a>
+      <a class="row" href="wulei-zhihui-manual.html">
+        <span class="dot" style="background:#86efac"></span>
+        <span class="name">智慧手动版</span>
+        <span class="chev"></span>
+      </a>
+    </div>
+  </div>
+  <div class="group">
+    <div class="gtitle">财神</div>
+    <div class="list">
+      <a class="row" href="wulei-caishen-plus.html">
+        <span class="dot" style="background:#fca5a5"></span>
+        <span class="name">加强版财神</span>
+        <span class="chev"></span>
+      </a>
+      <a class="row" href="wulei-caishen.html">
+        <span class="dot" style="background:#fcd34d"></span>
+        <span class="name">财神</span>
+        <span class="chev"></span>
+      </a>
+    </div>
+  </div>
+  <div class="group">
+    <div class="gtitle">其它</div>
+    <div class="list">
+      <a class="row" href="alading.html">
+        <span class="dot" style="background:#c4b5fd"></span>
+        <span class="name">阿拉丁</span>
+        <span class="chev"></span>
+      </a>
+    </div>
+  </div>
+</div>
+<script>if ("serviceWorker" in navigator) { navigator.serviceWorker.register("sw.js").catch(function(){}); }</script>
+</body>
+</html>
