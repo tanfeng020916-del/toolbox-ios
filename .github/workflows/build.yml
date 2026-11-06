@@ -1,0 +1,65 @@
+name: build-ipa
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-14
+    timeout-minutes: 25
+
+    steps:
+      - name: 拉取代码
+        uses: actions/checkout@v4
+
+      - name: 安装 XcodeGen
+        run: brew install xcodegen
+
+      - name: 环境信息
+        run: |
+          sw_vers
+          xcodebuild -version
+          xcodegen --version
+
+      - name: 生成 Xcode 工程
+        run: |
+          xcodegen generate
+          xcodebuild -list -project WebShell.xcodeproj
+
+      - name: 编译（不签名）
+        run: |
+          xcodebuild \
+            -project WebShell.xcodeproj \
+            -scheme WebShell \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build
+
+      - name: 打成未签名 IPA
+        run: |
+          set -e
+          find build/Build/Products -maxdepth 2 -name "*.app" || true
+          APP=$(find build/Build/Products -maxdepth 3 -name "*.app" | head -1)
+          if [ -z "$APP" ]; then echo "没找到 .app，编译可能失败"; exit 1; fi
+          echo "APP=$APP"
+          rm -rf out && mkdir -p out/Payload
+          cp -R "$APP" out/Payload/
+          rm -rf "out/Payload/$(basename "$APP")/_CodeSignature" || true
+          cd out
+          zip -qry ../WebShell-unsigned.ipa Payload
+          cd ..
+          ls -lh WebShell-unsigned.ipa
+
+      - name: 上传产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: WebShell-unsigned-ipa
+          path: WebShell-unsigned.ipa
+          retention-days: 30
